@@ -10,37 +10,26 @@ using System.Threading.Tasks;
 
 namespace Remotes.Models
 {
-    public class UserDAO : IUserService
+    public class UserDAO : BaseDAO<UserModel>, IUserService
     {
-        private string _connectString;
-        public UserDAO(IConfiguration configruration)
+        public UserDAO(IConfiguration configruration) : base(configruration)
         {
-            _connectString = configruration.GetConnectionString("DefaultConnectionString");
         }
 
         public long CreateUser(UserModel model)
         {
-            using (var conn = new System.Data.SqlClient.SqlConnection(_connectString))
-            {
-                return conn.QueryFirst<long>("CreateUser", model, commandType: CommandType.StoredProcedure);
-            }
+            return (long)Excute("CreateUser", model);
         }
 
         public UserModel GetUser(string name)
         {
-            using (var conn = new System.Data.SqlClient.SqlConnection(_connectString))
-            {
-                var parm = new UserModel { UserName = name };
-                return conn.QueryFirstOrDefault<UserModel>("GetTop1UserByUserName", parm, commandType: CommandType.StoredProcedure);
-            }
+            var parm = new UserModel { UserName = name };
+            return Query("GetTop1UserByUserName", parm);
         }
 
         public void UpdateBalance(UserModel model)
         {
-            using (var conn = new System.Data.SqlClient.SqlConnection(_connectString))
-            {
-                conn.Execute("UpdateUserBalanceByID", model, commandType: CommandType.StoredProcedure);
-            }
+            Excute("UpdateUserBalanceByID", model);
         }
     }
 }

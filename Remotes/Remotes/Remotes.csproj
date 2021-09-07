@@ -5,7 +5,7 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <Compile Remove="Models\DataAccess\BaseDAO.cs" />
+    <Compile Remove="Models\DataAccess\IDaoService.cs" />
     <Compile Remove="Models\DataAccess\PlayerRepository.cs" />
     <Compile Remove="Services\IPlayerService.cs" />
   </ItemGroup>

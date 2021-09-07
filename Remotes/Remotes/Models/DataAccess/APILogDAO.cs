@@ -10,36 +10,25 @@ using System.Threading.Tasks;
 
 namespace Remotes.Models
 {
-    public class APILogDAO : ILogService
+    public class APILogDAO : BaseDAO<APILogModel>, ILogService
     {
-        private string _connectString;
-        public APILogDAO(IConfiguration configruration)
+        public APILogDAO(IConfiguration configruration) : base(configruration)
         {
-            _connectString = configruration.GetConnectionString("DefaultConnectionString");
         }
 
         public long CreateAPIReqLog(APILogModel model)
         {
-            using (var conn = new System.Data.SqlClient.SqlConnection(_connectString))
-            {
-                return conn.QueryFirst<long>("CreateAPILog", model, commandType: CommandType.StoredProcedure);
-            }
+            return (long)Excute("CreateAPILog", model);
         }
 
         public void CreateAPIRespLog(APILogModel model)
         {
-            using (var conn = new System.Data.SqlClient.SqlConnection(_connectString))
-            {
-                conn.Execute("UpdateAPILogResponseData", model, commandType: CommandType.StoredProcedure);
-            }
+            Excute("UpdateAPILogResponseData", model);
         }
-
+        
         public IEnumerable<APILogModel> GetAllAPILog()
         {
-            using (var conn = new System.Data.SqlClient.SqlConnection(_connectString))
-            {
-                return conn.Query<APILogModel>("GetAllAPILog", commandType: CommandType.StoredProcedure);
-            }
+            return QueryItems("GetAllAPILog");
         }
     }
 }

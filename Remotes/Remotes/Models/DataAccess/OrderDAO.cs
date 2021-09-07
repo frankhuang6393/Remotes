@@ -10,37 +10,26 @@ using System.Threading.Tasks;
 
 namespace Remotes.Models
 {
-    public class OrderDAO : IOrderService
+    public class OrderDAO : BaseDAO<OrderModel>, IOrderService
     {
-        private string _connectString;
-        public OrderDAO(IConfiguration configruration)
+        public OrderDAO(IConfiguration configruration) : base(configruration)
         {
-            _connectString = configruration.GetConnectionString("DefaultConnectionString");
         }
 
         public long CreateOrder(OrderModel model)
         {
-            using (var conn = new System.Data.SqlClient.SqlConnection(_connectString))
-            {
-                return conn.QueryFirst<long>("CreateOrder", model, commandType: CommandType.StoredProcedure);
-            }
+            return (long)Excute("CreateOrder", model);
         }
-
+        
         public OrderModel GetOrder(string orderId)
         {
-            using (var conn = new System.Data.SqlClient.SqlConnection(_connectString))
-            {
-                var parm = new OrderModel { OrderID = orderId, CreateTime = DateTime.Now };
-                return conn.QueryFirstOrDefault<OrderModel>("GetTop1OrderByOrderID", parm, commandType: CommandType.StoredProcedure);
-            }
+            var parm = new OrderModel { OrderID = orderId, CreateTime = DateTime.Now };
+            return Query("GetTop1OrderByOrderID", parm);
         }
 
         public void UpdateOrderState(OrderModel model)
         {
-            using (var conn = new System.Data.SqlClient.SqlConnection(_connectString))
-            {
-                conn.Execute("UpdateOrderStateByOrderID", model, commandType: CommandType.StoredProcedure);
-            }
+            Excute("UpdateOrderStateByOrderID", model);
         }
     }
 }

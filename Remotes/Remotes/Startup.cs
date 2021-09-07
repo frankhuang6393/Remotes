@@ -29,7 +29,7 @@ namespace Remotes
             services.TryAddScoped<Remotes.Services.IOrderService, Remotes.Models.OrderDAO>();
             services.TryAddScoped<Remotes.Services.IUserService, Remotes.Models.UserDAO>();
             services.TryAddScoped<Remotes.Services.ILogService, Models.APILogDAO>();
-            services.TryAddScoped<Remotes.Services.IPlayerService, Models.PlayerRepository>();
+            services.TryAddScoped<Remotes.Services.IDaoService<object>, Models.BaseDAO<object>>();
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
