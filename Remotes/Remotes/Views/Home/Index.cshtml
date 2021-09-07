@@ -1,0 +1,77 @@
+﻿@{
+    ViewData["Title"] = "Home Page";
+}
+
+<div id="app" class="text-center">
+    <div>
+        <input id="txtUserName" v-model="userName" type="text" placeholder="請輸入玩家名稱" />
+        <button @@click="getData()" id="btnSubmit" type="submit">Submit</button>
+    </div>
+    <div>
+        <span v-if="currency != ''">幣別 : </span>
+        <span v-if="currency != ''">{{currency}}</span>
+        <span v-if="balance != 0">結餘 : </span>
+        @*<span v-if="balance != 0" v-text="balance"></span>*@
+        <span>{{balance}}</span>
+    </div>
+    <table class="table table-striped">
+        <thead>
+            <tr>
+                <th>API Name</th>
+                <th>Order ID</th>
+                <th>Game Provider ID</th>
+                <th>Amount</th>
+                <th>Balance</th>
+                <th>Date Time</th>
+            </tr>
+        </thead>
+        <tbody>
+            <tr v-for="item in logDatas">
+                <td>{{item.apiName}}</td>
+                <td>{{item.orderID}}</td>
+                <td>{{item.gameProviderID}}</td>
+                <td>{{item.amount}}</td>
+                <td>{{item.balance}}</td>
+                <td>{{item.createTime}}</td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+
+@section Scripts
+{
+    <script src="https://unpkg.com/vue@next"></script>
+    <script src="https://cdn.jsdelivr.net/npm/vue-router/dist/vue-router.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/axios/0.21.1/axios.min.js"></script>
+
+    <script>
+        const app = ({
+            data() {
+                return {
+                    logDatas: [],
+                    userName: '',
+                    balance: 0,
+                    currency: ''
+                }
+            },
+            methods: {
+                getData: function () {
+                    let that = this;
+                    $.get(`@Url.RouteUrl("api_route", new { Controller = "APILog"})?userName=${that.userName}`, function (resp) {
+                        if (resp.success == true) {
+                            that.userName = resp.content.userName;
+                            that.balance = resp.content.balance;
+                            that.currency = resp.content.currency;
+                            that.logDatas = resp.content.apiLogDatas;
+                        }
+                        else {
+                            alert('Failed : ' + resp.message)
+                        }
+                    });
+                }
+            }
+        });
+
+        Vue.createApp(app).mount('#app');
+    </script>
+}
