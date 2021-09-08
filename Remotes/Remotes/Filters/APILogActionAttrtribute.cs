@@ -4,6 +4,7 @@ using Remotes.Services;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Text.Json;
 using System.Threading.Tasks;
 
 namespace Remotes.Filters
@@ -27,14 +28,14 @@ namespace Remotes.Filters
                 case "GET":
                 case "DELETE":
                     var dictQuery = context.Request.Query.ToDictionary(k => k.Key, v => v.Value);
-                    jsonData = Newtonsoft.Json.JsonConvert.SerializeObject(dictQuery);
+                    jsonData = JsonSerializer.Serialize(dictQuery);
                     break;
 
                 default:
                     if (actionExecutingContext.ActionArguments.Count() > 0)
                     {
                         var arg = actionExecutingContext.ActionArguments[actionExecutingContext.ActionArguments.Keys.FirstOrDefault()];
-                        jsonData = Newtonsoft.Json.JsonConvert.SerializeObject(arg);
+                        jsonData = JsonSerializer.Serialize(arg);
                     }
                     break;
             }
@@ -45,7 +46,7 @@ namespace Remotes.Filters
         {
             var context = actionExecutedContext.HttpContext;
             var respDatas = actionExecutedContext.Result.GetType().GetProperty("Value").GetValue(actionExecutedContext.Result);
-            var jsonData = Newtonsoft.Json.JsonConvert.SerializeObject(respDatas);
+            var jsonData = JsonSerializer.Serialize(respDatas);
 
             WriteLog(false, context.TraceIdentifier, context.Request.Path, context.Request.Method, jsonData);
         }
@@ -75,7 +76,7 @@ namespace Remotes.Filters
             }
 
             var title = $"[{(isRequest ? "Request" : "Response")}] [{method}] {transName}";
-            Tools.WriteAPILogFile($"{title} TraceID:{traceId} Data:{jsonData}", eLogType.Debug);
+            Tools.WriteAPILogFile($"{title} TraceID:{traceId} Data:{jsonData}", LogType.Debug);
         }
     }
 }

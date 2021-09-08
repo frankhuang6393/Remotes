@@ -6,7 +6,6 @@ using System.Linq;
 using System.Threading.Tasks;
 using Remotes.ViewModel;
 using Remotes.Models;
-using Newtonsoft.Json;
 using Remotes.Filters;
 using Remotes.Services;
 
@@ -42,12 +41,12 @@ namespace Remotes.API
                     UserName = data.UserName,
                 };
                 resp.Success = true;
-                resp.APIReturnCode = eAPIReturnCode.Success;
+                resp.APIReturnCode = APIReturnCode.Success;
             }
             catch (Exception ex)
             {
                 resp.Success = false;
-                resp.APIReturnCode = eAPIReturnCode.Exception;
+                resp.APIReturnCode = APIReturnCode.Exception;
                 resp.Message = ex.Message;
             }
 
@@ -61,12 +60,7 @@ namespace Remotes.API
             try
             {
                 var user = _userService.GetUser(userName);
-                if (user == null)
-                {
-                    resp.APIReturnCode = eAPIReturnCode.UserIsNotExist;
-                    resp.Message = "This UserName is not exist";
-                }
-                else
+                if (Tools.CheckAPIParamterWithMessage(APICheckParamterType.UserName, resp, user))
                 {
                     resp.Content = new UserViewModel()
                     {
@@ -75,13 +69,13 @@ namespace Remotes.API
                         UserName = user.UserName,
                     };
                     resp.Success = true;
-                    resp.APIReturnCode = eAPIReturnCode.Success;
+                    resp.APIReturnCode = APIReturnCode.Success;
                 }
             }
             catch (Exception ex)
             {
                 resp.Success = false;
-                resp.APIReturnCode = eAPIReturnCode.Exception;
+                resp.APIReturnCode = APIReturnCode.Exception;
                 resp.Message = ex.Message;
             }
 

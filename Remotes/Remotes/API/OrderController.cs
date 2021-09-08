@@ -1,7 +1,6 @@
 ﻿using Remotes.Models;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
-using Newtonsoft.Json;
 using Remotes.ViewModel;
 using System;
 using System.Collections.Generic;
@@ -32,12 +31,7 @@ namespace Remotes.API
             try
             {
                 var user = _userService.GetUser(data.UserName);
-                if (user == null)
-                {
-                    resp.APIReturnCode = eAPIReturnCode.UserIsNotExist;
-                    resp.Message = "This UserName is not exist";
-                }
-                else
+                if(Tools.CheckAPIParamterWithMessage(APICheckParamterType.UserName, resp, user))
                 {
                     if (user.Balance >= data.Amount)
                     {
@@ -55,12 +49,12 @@ namespace Remotes.API
                         user.Balance -= data.Amount;
                         _userService.UpdateBalance(user);
                         resp.Success = true;
-                        resp.APIReturnCode = eAPIReturnCode.Success;
+                        resp.APIReturnCode = APIReturnCode.Success;
                     }
                     else
                     {
-                        resp.APIReturnCode = eAPIReturnCode.UserInsufficientBalance;
-                        resp.Message = "This User is insufficient balance";
+                        resp.APIReturnCode = APIReturnCode.UserInsufficientBalance;
+                        resp.Message = "This user is insufficient balance";
                     }
 
                     resp.Content = new PlaceOrderResponseViewModel()
@@ -74,7 +68,7 @@ namespace Remotes.API
             catch (Exception ex)
             {
                 resp.Success = false;
-                resp.APIReturnCode = eAPIReturnCode.Exception;
+                resp.APIReturnCode = APIReturnCode.Exception;
                 resp.Message = ex.Message;
             }
 
@@ -90,18 +84,9 @@ namespace Remotes.API
                 var isCheckPass = true;
                 var user = _userService.GetUser(data.UserName);
                 var order = _orderService.GetOrder(data.OrderID);
-                if (user == null)
-                {
-                    resp.APIReturnCode = eAPIReturnCode.UserIsNotExist;
-                    resp.Message = "This UserName is not exist";
-                    isCheckPass = false;
-                }
-                if (order == null)
-                {
-                    resp.APIReturnCode = eAPIReturnCode.OrderIsNotExist;
-                    resp.Message = "This OrderID is not exist";
-                    isCheckPass = false;
-                }
+                isCheckPass = Tools.CheckAPIParamterWithMessage(APICheckParamterType.UserName, resp, user) 
+                        && Tools.CheckAPIParamterWithMessage(APICheckParamterType.OrderID, resp, order);
+                
                 if (isCheckPass && order.State == eOrderState.Bet)
                 {
                     switch (data.State)
@@ -129,13 +114,13 @@ namespace Remotes.API
                         UserName = user.UserName,
                     };
                     resp.Success = true;
-                    resp.APIReturnCode = eAPIReturnCode.Success;
+                    resp.APIReturnCode = APIReturnCode.Success;
                 }
             }
             catch (Exception ex)
             {
                 resp.Success = false;
-                resp.APIReturnCode = eAPIReturnCode.Exception;
+                resp.APIReturnCode = APIReturnCode.Exception;
                 resp.Message = ex.Message;
             }
 

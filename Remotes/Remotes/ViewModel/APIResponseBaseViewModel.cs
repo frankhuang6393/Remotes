@@ -11,7 +11,7 @@ namespace Remotes.ViewModel
         public string Message { get; set; }
         public T Content { get; set; }
 
-        public eAPIReturnCode APIReturnCode { get; set; }
+        public APIReturnCode APIReturnCode { get; set; }
     }
 
     public class APICommonResponseViewModel
@@ -26,7 +26,7 @@ namespace Remotes.ViewModel
         public string UserName { get; set; }
     }
 
-    public enum eAPIReturnCode
+    public enum APIReturnCode
     {
         /// <summary>
         /// 成功

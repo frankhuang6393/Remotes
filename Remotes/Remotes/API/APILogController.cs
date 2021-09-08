@@ -1,7 +1,7 @@
 ﻿using Remotes.Models;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
-using Newtonsoft.Json;
+using System.Text.Json;
 using Remotes.ViewModel;
 using System;
 using System.Collections.Generic;
@@ -30,124 +30,99 @@ namespace Remotes.API
             var resp = new APIResponseBaseViewModel<APILogViewModel>();
             try
             {
-                if (string.IsNullOrWhiteSpace(userName))
-                {
-                    resp.APIReturnCode = eAPIReturnCode.UserIsNotExist;
-                    resp.Message = "This UserName is not exist";
-                }
-
                 var user = _userService.GetUser(userName);
-                if (user == null)
-                {
-                    resp.APIReturnCode = eAPIReturnCode.UserIsNotExist;
-                    resp.Message = "This UserName is not exist";
-                }
-                else
+                if (Tools.CheckAPIParamterWithMessage(APICheckParamterType.UserName, resp, user))
                 {
                     var allLogs = _logService.GetAllAPILog();
                     //過濾使用者以及API名稱
-                    var relTransName = new string[] 
-                    { 
-                        Url.RouteUrl("api_route", new { Controller = "User" }), 
-                        Url.RouteUrl("api_route", new { Controller = "Order" }), 
+                    var relTransName = new string[]
+                    {
+                        Url.RouteUrl("api_route", new { Controller = "User" }),
+                        Url.RouteUrl("api_route", new { Controller = "Order" }),
                     };
                     allLogs = allLogs.Where(r => relTransName.Contains(r.TransName)).OrderByDescending(r => r.RequestTime);
 
-                    var aPILogDatas = new List<APILogData>();
-                    
-                    foreach (var item in allLogs)
-                    {
-                        //註冊
-                        if (item.TransName == Url.RouteUrl("api_route", new { Controller = "User" })
-                                && item.Method == "POST")
-                        {
-                            var reqItem = Newtonsoft.Json.JsonConvert.DeserializeObject<UserViewModel>(item.RequestData);
-                            var respItem = Newtonsoft.Json.JsonConvert.DeserializeObject<APIResponseBaseViewModel<APICommonResponseViewModel>>(item.ResponseData);
-
-                            if (respItem.Success)
-                            {
-                                aPILogDatas.Add(new APILogData()
-                                {
-                                    APIName = $"[{item.Method}] {item.TransName}",
-                                    UserName = reqItem.UserName,
-                                    Amount = reqItem.Balance,
-                                    Balance = reqItem.Balance,
-                                    CreateTime = item.RequestTime.ToString("yyyy/MM/dd HH:mm:ss"),
-                                }); 
-                            }
-                        }
-                        //下注相關
-                        else if (item.TransName == Url.RouteUrl("api_route", new { Controller = "Order" }))
-                        {
-                            switch (item.Method)
-                            {
-                                //下注
-                                case "POST":
-                                    {
-                                        var reqItem = Newtonsoft.Json.JsonConvert.DeserializeObject<PlaceOrderViewModel>(item.RequestData);
-                                        var respItem = Newtonsoft.Json.JsonConvert.DeserializeObject<APIResponseBaseViewModel<PlaceOrderResponseViewModel>>(item.ResponseData);
-
-                                        if (respItem.Success)
-                                        {
-                                            aPILogDatas.Add(new APILogData()
-                                            {
-                                                APIName = $"[{item.Method}] {item.TransName}",
-                                                UserName = respItem.Content.UserName,
-                                                Amount = reqItem.Amount,
-                                                Balance = respItem.Content.Balance,
-                                                CreateTime = item.RequestTime.ToString("yyyy/MM/dd HH:mm:ss"),
-                                                GameProviderID = reqItem.GameProviderID,
-                                                OrderID = reqItem.OrderID.ToString("N"),
-                                            }); 
-                                        }
-                                    }
-                                    break;
-
-                                //下注結果
-                                case "PATCH":
-                                    {
-                                        var reqItem = Newtonsoft.Json.JsonConvert.DeserializeObject<OrderResultViewModel>(item.RequestData);
-                                        var respItem = Newtonsoft.Json.JsonConvert.DeserializeObject<APIResponseBaseViewModel<APICommonResponseViewModel>>(item.ResponseData);
-
-                                        if (respItem.Success)
-                                        {
-                                            aPILogDatas.Add(new APILogData()
-                                            {
-                                                APIName = $"[{item.Method}] {item.TransName}",
-                                                UserName = respItem.Content.UserName,
-                                                Amount = reqItem.Amount,
-                                                Balance = respItem.Content.Balance,
-                                                CreateTime = item.RequestTime.ToString("yyyy/MM/dd HH:mm:ss"),
-                                                GameProviderID = reqItem.GameProviderID,
-                                                OrderID = reqItem.OrderID,
-                                            }); 
-                                        }
-                                    }
-                                    break;
-                                default:
-                                    break;
-                            }
-                        }
-                    }
                     resp.Content = new APILogViewModel()
                     {
                         Balance = user.Balance,
                         UserName = user.UserName,
                         Currency = user.Currency,
-                        APILogDatas = aPILogDatas,
+                        APILogDatas = GetAPIViewLogDatas(allLogs),
                     };
                     resp.Success = true;
-                    resp.APIReturnCode = eAPIReturnCode.Success;
+                    resp.APIReturnCode = APIReturnCode.Success;
                 }
             }
             catch (Exception ex)
             {
                 resp.Success = false;
-                resp.APIReturnCode = eAPIReturnCode.Exception;
+                resp.APIReturnCode = APIReturnCode.Exception;
                 resp.Message = ex.Message;
             }
 
             return resp;
+        }
+
+        private List<APILogData> GetAPIViewLogDatas(IEnumerable<APILogModel> logs)
+        {
+            var apiLogDatas = new List<APILogData>();
+            foreach (var item in logs)
+            {
+                bool success = false;
+                string userName = null, orderId = null;
+                decimal amount = 0, balance = 0;
+                long gameProviderID = 0;
+                //註冊
+                if (item.TransName == Url.RouteUrl("api_route", new { Controller = "User" })
+                        && item.Method == "POST")
+                {
+                    
+                    var reqItem = JsonSerializer.Deserialize<UserViewModel>(item.RequestData);
+                    var respItem = JsonSerializer.Deserialize<APIResponseBaseViewModel<APICommonResponseViewModel>>(item.ResponseData);
+                    success = respItem.Success;
+                    userName = reqItem.UserName;
+                    amount = balance = reqItem.Balance;
+                }
+                //下注相關
+                else if (item.TransName == Url.RouteUrl("api_route", new { Controller = "Order" }))
+                {
+                    dynamic reqItem = null, respItem = null;
+                    switch (item.Method)
+                    {
+                        case "POST":
+                            reqItem = JsonSerializer.Deserialize<PlaceOrderViewModel>(item.RequestData);
+                            respItem = JsonSerializer.Deserialize<APIResponseBaseViewModel<PlaceOrderResponseViewModel>>(item.ResponseData);
+                            orderId = reqItem.OrderID.ToString("N");
+                            break;
+                        case "PATCH":
+                            reqItem = JsonSerializer.Deserialize<OrderResultViewModel>(item.RequestData);
+                            respItem = JsonSerializer.Deserialize<APIResponseBaseViewModel<APICommonResponseViewModel>>(item.ResponseData);
+                            orderId = reqItem.OrderID;
+                            break;
+                    }
+                    success = respItem != null ? respItem.Success : false;
+                    userName = respItem != null ? respItem.Content.UserName : null;
+                    amount = reqItem != null ? reqItem.Amount : 0;
+                    balance = respItem != null ? respItem.Content.Balance : 0;
+                    gameProviderID = reqItem != null ? reqItem.GameProviderID : 0;
+                }
+
+                if (success)
+                {
+                    apiLogDatas.Add(new APILogData()
+                    {
+                        APIName = $"[{item.Method}] {item.TransName}",
+                        UserName = userName,
+                        Amount = amount,
+                        Balance = balance,
+                        CreateTime = item.RequestTime.ToString("yyyy/MM/dd HH:mm:ss"),
+                        GameProviderID = gameProviderID,
+                        OrderID = orderId,
+                    });
+                }
+            }
+
+            return apiLogDatas;
         }
     }
 }
