@@ -5,6 +5,13 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <Compile Remove="UnitTest\**" />
+    <Content Remove="UnitTest\**" />
+    <EmbeddedResource Remove="UnitTest\**" />
+    <None Remove="UnitTest\**" />
+  </ItemGroup>
+
+  <ItemGroup>
     <Compile Remove="Models\DataAccess\IDaoService.cs" />
     <Compile Remove="Models\DataAccess\PlayerRepository.cs" />
     <Compile Remove="Services\IPlayerService.cs" />
@@ -18,6 +25,9 @@
     <PackageReference Include="bootstrap" Version="5.1.0" />
     <PackageReference Include="Dapper" Version="2.0.90" />
     <PackageReference Include="log4net" Version="2.0.12" />
+    <PackageReference Include="NUnit" Version="3.13.1" />
+    <PackageReference Include="NUnit.Runners" Version="3.12.0" />
+    <PackageReference Include="NUnit3TestAdapter" Version="3.17.0" />
     <PackageReference Include="System.Data.SqlClient" Version="4.8.2" />
   </ItemGroup>
 
