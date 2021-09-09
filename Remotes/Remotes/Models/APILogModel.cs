@@ -10,8 +10,6 @@ namespace Remotes.Models
 {
     public class APILogModel
     {
-        [NotMapped]
-        public const string TableName = "APILog";
         [Key]
         public long ID { get; set; }
         /// <summary>

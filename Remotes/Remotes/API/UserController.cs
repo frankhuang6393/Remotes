@@ -12,7 +12,7 @@ using Remotes.Services;
 namespace Remotes.API
 {
     [Route("api/[controller]")]
-    [ApiController, TypeFilter(typeof(APILogActionFilter))]
+    [ApiController, TypeFilter(typeof(APIActionCustomFilter))]
     public class UserController : ControllerBase
     {
         private readonly IUserService _userService;
@@ -26,29 +26,18 @@ namespace Remotes.API
         public APIResponseBaseViewModel<APICommonResponseViewModel> POST([FromBody] UserViewModel data)
         {
             var resp = new APIResponseBaseViewModel<APICommonResponseViewModel>();
-            try
+            _userService.CreateUser(new UserModel()
             {
-                _userService.CreateUser(new UserModel()
-                {
-                    Balance = data.Balance,
-                    Currency = data.Currency,
-                    UserName = data.UserName,
-                });
+                Balance = data.Balance,
+                Currency = data.Currency,
+                UserName = data.UserName,
+            });
 
-                resp.Content = new APICommonResponseViewModel()
-                {
-                    Balance = data.Balance,
-                    UserName = data.UserName,
-                };
-                resp.Success = true;
-                resp.APIReturnCode = APIReturnCode.Success;
-            }
-            catch (Exception ex)
+            resp.Content = new APICommonResponseViewModel()
             {
-                resp.Success = false;
-                resp.APIReturnCode = APIReturnCode.Exception;
-                resp.Message = ex.Message;
-            }
+                Balance = data.Balance,
+                UserName = data.UserName,
+            };
 
             return resp;
         }
@@ -57,26 +46,15 @@ namespace Remotes.API
         public APIResponseBaseViewModel<UserViewModel> GET(string userName)
         {
             var resp = new APIResponseBaseViewModel<UserViewModel>();
-            try
+            var user = _userService.GetUser(userName);
+            if (Tools.CheckAPIParamterWithMessage(APICheckParamterType.UserName, resp, user))
             {
-                var user = _userService.GetUser(userName);
-                if (Tools.CheckAPIParamterWithMessage(APICheckParamterType.UserName, resp, user))
+                resp.Content = new UserViewModel()
                 {
-                    resp.Content = new UserViewModel()
-                    {
-                        Balance = user.Balance,
-                        Currency = user.Currency,
-                        UserName = user.UserName,
-                    };
-                    resp.Success = true;
-                    resp.APIReturnCode = APIReturnCode.Success;
-                }
-            }
-            catch (Exception ex)
-            {
-                resp.Success = false;
-                resp.APIReturnCode = APIReturnCode.Exception;
-                resp.Message = ex.Message;
+                    Balance = user.Balance,
+                    Currency = user.Currency,
+                    UserName = user.UserName,
+                };
             }
 
             return resp;

@@ -13,9 +13,6 @@ namespace Remotes.Models
     /// </summary>
     public class OrderModel
     {
-        [NotMapped]
-        public const string TableName = "Order";
-
         [Key]
         public long ID { get; set; }
         /// <summary>
@@ -41,7 +38,7 @@ namespace Remotes.Models
         /// <summary>
         /// 下注狀態
         /// </summary>
-        public eOrderState State { get; set; }
+        public OrderState State { get; set; }
         /// <summary>
         /// 建立時間
         /// </summary>
@@ -52,7 +49,7 @@ namespace Remotes.Models
         public DateTime? ModifiedTime { get; set; }
     }
 
-    public enum eOrderState
+    public enum OrderState
     {
         /// <summary>
         /// 已下注

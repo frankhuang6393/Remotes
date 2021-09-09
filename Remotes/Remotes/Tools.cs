@@ -40,16 +40,16 @@ namespace Remotes
                 switch (type)
                 {
                     case APICheckParamterType.UserName:
-                        resp.Message = "This user name is not exist";
                         resp.APIReturnCode = ViewModel.APIReturnCode.UserIsNotExist;
                         break;
                     case APICheckParamterType.OrderID:
-                        resp.Message = "This order ID is not exist";
                         resp.APIReturnCode = ViewModel.APIReturnCode.OrderIsNotExist;
                         break;
                     default:
                         break;
                 }
+                resp.Message = type.Description();
+                resp.Success = false;
                 result = false;
             }
 

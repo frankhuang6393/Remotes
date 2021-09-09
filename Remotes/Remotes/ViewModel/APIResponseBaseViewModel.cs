@@ -7,6 +7,12 @@ namespace Remotes.ViewModel
 {
     public class APIResponseBaseViewModel<T>
     {
+        public APIResponseBaseViewModel()
+        {
+            Success = true;
+            APIReturnCode = APIReturnCode.Success;
+        }
+
         public bool Success { get; set; }
         public string Message { get; set; }
         public T Content { get; set; }

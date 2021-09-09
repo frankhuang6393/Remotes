@@ -13,9 +13,6 @@ namespace Remotes.Models
     /// </summary>
     public class GameProviderModel
     {
-        [NotMapped]
-        public const string TableName = "GameProvider";
-
         [Key]
         public long ID { get; set; }
         /// <summary>

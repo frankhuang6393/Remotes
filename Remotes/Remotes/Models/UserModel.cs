@@ -13,9 +13,6 @@ namespace Remotes.Models
     /// </summary>
     public class UserModel
     {
-        [NotMapped]
-        public const string TableName = "User";
-
         [Key]
         public long ID { get; set; }
         /// <summary>

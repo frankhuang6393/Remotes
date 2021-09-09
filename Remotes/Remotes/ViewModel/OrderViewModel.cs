@@ -60,6 +60,6 @@ namespace Remotes.ViewModel
         /// <summary>
         /// 下注狀態 1:Won, 2:Lose, 3:Draw
         /// </summary>
-        public eOrderState State { get; set; }
+        public OrderState State { get; set; }
     }
 }

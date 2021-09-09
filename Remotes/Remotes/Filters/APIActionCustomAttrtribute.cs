@@ -9,11 +9,11 @@ using System.Threading.Tasks;
 
 namespace Remotes.Filters
 {
-    public class APILogActionFilter : IActionFilter
+    public class APIActionCustomFilter : IActionFilter
     {
         private readonly ILogService _logService;
 
-        public APILogActionFilter(ILogService logService)
+        public APIActionCustomFilter(ILogService logService)
         {
             _logService = logService;
         }
@@ -45,9 +45,23 @@ namespace Remotes.Filters
         public void OnActionExecuted(ActionExecutedContext actionExecutedContext)
         {
             var context = actionExecutedContext.HttpContext;
-            var respDatas = actionExecutedContext.Result.GetType().GetProperty("Value").GetValue(actionExecutedContext.Result);
-            var jsonData = JsonSerializer.Serialize(respDatas);
+            dynamic respDatas = new ViewModel.APIResponseBaseViewModel<object>();
+            if (actionExecutedContext.Exception == null)
+            {
+                respDatas = actionExecutedContext.Result.GetType().GetProperty("Value").GetValue(actionExecutedContext.Result);
+            }
+            else
+            {
+                respDatas.Success = false;
+                respDatas.APIReturnCode = ViewModel.APIReturnCode.Exception;
+                respDatas.Message = actionExecutedContext.Exception.Message;
 
+                var resultObj = new Microsoft.AspNetCore.Mvc.OkObjectResult(respDatas) { DeclaredType = typeof(ViewModel.APIResponseBaseViewModel<object>) };
+                actionExecutedContext.Result = resultObj;
+                actionExecutedContext.Exception = null;  //不拿掉會造成回傳500
+            }
+
+            var jsonData = JsonSerializer.Serialize(respDatas);
             WriteLog(false, context.TraceIdentifier, context.Request.Path, context.Request.Method, jsonData);
         }
 
