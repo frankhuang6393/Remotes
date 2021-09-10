@@ -10,25 +10,27 @@ using System.Threading.Tasks;
 
 namespace Remotes.Models
 {
-    public class APILogDAO : BaseDAO<APILogModel>, ILogService
+    public class APILogDAO : ILogService
     {
-        public APILogDAO(IConfiguration configruration) : base(configruration)
+        private readonly IDaoService<APILogModel> _daoService;
+        public APILogDAO(IDaoService<APILogModel> daoService)
         {
+            _daoService = daoService;
         }
 
         public long CreateAPIReqLog(APILogModel model)
         {
-            return (long)Excute("CreateAPILog", model);
+            return (long)(_daoService.Excute("CreateAPILog", model) ?? -1L);
         }
 
         public void CreateAPIRespLog(APILogModel model)
         {
-            Excute("UpdateAPILogResponseData", model);
+            _daoService.Excute("UpdateAPILogResponseData", model);
         }
         
         public IEnumerable<APILogModel> GetAllAPILog()
         {
-            return QueryItems("GetAllAPILog");
+            return _daoService.QueryItems("GetAllAPILog");
         }
     }
 }

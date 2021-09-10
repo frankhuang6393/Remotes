@@ -17,6 +17,8 @@ namespace Remotes.Models
             _connectString = configruration.GetConnectionString("DefaultConnectionString");
         }
 
+        public event EventHandler Executed;
+
         public object Excute(string procedureName, T model)
         {
             try

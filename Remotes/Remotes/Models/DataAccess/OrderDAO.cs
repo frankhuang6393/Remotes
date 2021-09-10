@@ -10,26 +10,28 @@ using System.Threading.Tasks;
 
 namespace Remotes.Models
 {
-    public class OrderDAO : BaseDAO<OrderModel>, IOrderService
+    public class OrderDAO : IOrderService
     {
-        public OrderDAO(IConfiguration configruration) : base(configruration)
+        private readonly IDaoService<OrderModel> _daoService;
+        public OrderDAO(IDaoService<OrderModel> daoService)
         {
+            _daoService = daoService;
         }
 
         public long CreateOrder(OrderModel model)
         {
-            return (long)Excute("CreateOrder", model);
+            return (long)(_daoService.Excute("CreateOrder", model) ?? -1L);
         }
         
         public OrderModel GetOrder(string orderId)
         {
             var parm = new OrderModel { OrderID = orderId, CreateTime = DateTime.Now };
-            return Query("GetTop1OrderByOrderID", parm);
+            return _daoService.Query("GetTop1OrderByOrderID", parm);
         }
 
         public void UpdateOrderState(OrderModel model)
         {
-            Excute("UpdateOrderStateByOrderID", model);
+            _daoService.Excute("UpdateOrderStateByOrderID", model);
         }
     }
 }
