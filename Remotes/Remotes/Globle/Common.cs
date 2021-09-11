@@ -27,5 +27,10 @@ namespace Remotes
         /// </summary>
         [Description("This order ID is not exist")]
         OrderID,
+        /// <summary>
+        /// Secret錯誤
+        /// </summary>
+        [Description("Secret error")]
+        Secret
     }
 }

@@ -9,10 +9,12 @@ using System.Linq;
 using System.Threading.Tasks;
 using Remotes.Filters;
 using Remotes.Services;
+using Microsoft.AspNetCore.Authorization;
 
 namespace Remotes.API
 {
     [Route("api/[controller]")]
+    [Authorize]
     [ApiController, TypeFilter(typeof(APIActionCustomFilter))]
     public class APILogController : ControllerBase
     {

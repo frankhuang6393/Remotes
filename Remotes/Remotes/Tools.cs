@@ -22,7 +22,7 @@ namespace Remotes
             //讀取設定檔
             XmlConfigurator.Configure(new FileInfo("D:\\log\\log4netconfig.xml"));
             switch (type)
-            {   
+            {
                 case LogType.Debug: log.Debug(message); break;
                 case LogType.Info: log.Info(message); break;
                 case LogType.Warn: log.Warn(message); break;
@@ -32,25 +32,40 @@ namespace Remotes
             }
         }
 
-        public static bool CheckAPIParamterWithMessage<T>(APICheckParamterType type, ViewModel.APIResponseBaseViewModel<T> resp, object parm)
+        public static bool CheckAPIParamterWithMessage<T>(APICheckParamterType type, ViewModel.APIResponseBaseViewModel<T> resp, object checkParam, object checkParam2 = null)
         {
             bool result = true;
-            if (parm == null)
+            switch (type)
             {
-                switch (type)
-                {
-                    case APICheckParamterType.UserName:
+                case APICheckParamterType.UserName:
+                    if (checkParam == null)
+                    {
+                        result = false;
                         resp.APIReturnCode = ViewModel.APIReturnCode.UserIsNotExist;
-                        break;
-                    case APICheckParamterType.OrderID:
+                    }
+                    break;
+                case APICheckParamterType.OrderID:
+                    if (checkParam == null)
+                    {
+                        result = false;
                         resp.APIReturnCode = ViewModel.APIReturnCode.OrderIsNotExist;
-                        break;
-                    default:
-                        break;
-                }
+                    }
+                    break;
+                case APICheckParamterType.Secret:
+                    if (!((string)checkParam).Equals((string)checkParam2))
+                    {
+                        result = false;
+                        resp.APIReturnCode = ViewModel.APIReturnCode.TokenSecretError;
+                    }
+                    break;
+                default:
+                    break;
+            }
+
+            if(!result)
+            {
                 resp.Message = type.Description();
                 resp.Success = false;
-                result = false;
             }
 
             return result;

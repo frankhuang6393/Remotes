@@ -1,4 +1,5 @@
 ﻿using Microsoft.AspNetCore.Mvc;
+using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;
 using Remotes.Models;
 using System;
@@ -12,14 +13,16 @@ namespace Remotes.Controllers
     public class HomeController : Controller
     {
         private readonly ILogger<HomeController> _logger;
-
-        public HomeController(ILogger<HomeController> logger)
+        private readonly IConfiguration _configuration;
+        public HomeController(ILogger<HomeController> logger, IConfiguration configuration)
         {
             _logger = logger;
+            _configuration = configuration;
         }
 
         public IActionResult Index()
         {
+            ViewBag.Secret = _configuration.GetValue<string>("JwtSettings:SignKey");
             return View();
         }
 

@@ -20,5 +20,16 @@ namespace Remotes
 
             return value.ToString();
         }
+
+        public static string Sha256(this string input)
+        {
+            if (String.IsNullOrEmpty(input)) return string.Empty;
+            using (var sha = System.Security.Cryptography.SHA256.Create())
+            {
+                var bytes = System.Text.Encoding.UTF8.GetBytes(input);
+                var hash = sha.ComputeHash(bytes);
+                return Convert.ToBase64String(hash);
+            }
+        }
     }
 }

@@ -45,6 +45,11 @@ namespace Remotes.ViewModel
         Exception = 1,
 
         /// <summary>
+        /// Token Secret 錯誤
+        /// </summary>
+        TokenSecretError = 100,
+
+        /// <summary>
         /// 找不到此玩家
         /// </summary>
         UserIsNotExist = 200,

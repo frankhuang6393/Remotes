@@ -1,5 +1,6 @@
 ﻿@{
     ViewData["Title"] = "Home Page";
+    string secret = ViewBag.Secret;
 }
 
 <div id="app" class="text-center">
@@ -11,7 +12,6 @@
         <span v-if="currency != ''">幣別 : </span>
         <span v-if="currency != ''">{{currency}}</span>
         <span v-if="balance != 0">結餘 : </span>
-        @*<span v-if="balance != 0" v-text="balance"></span>*@
         <span>{{balance}}</span>
     </div>
     <table class="table table-striped">
@@ -51,24 +51,49 @@
                     logDatas: [],
                     userName: '',
                     balance: 0,
-                    currency: ''
+                    currency: '',
                 }
             },
             methods: {
+                getApiToken: function () {
+                    $.ajax({
+                        url: '@Url.RouteUrl("api_route", new { Controller = "GetToken" })',
+                        method: 'post',
+                        data: JSON.stringify({ "secret": "@Html.Raw(secret)" }),
+                        datatype: 'json',
+                        contentType: 'application/json',
+                        success: function (resp) {
+                            if (resp.success == true) {
+                                localStorage.setItem('token', resp.content.token);
+                            }
+                            else {
+                                alert('Failed : ' + resp.message);
+                            }
+                        }
+                    });
+                },
                 getData: function () {
                     let that = this;
-                    $.get(`@Url.RouteUrl("api_route", new { Controller = "APILog"})?userName=${that.userName}`, function (resp) {
-                        if (resp.success == true) {
-                            that.userName = resp.content.userName;
-                            that.balance = resp.content.balance;
-                            that.currency = resp.content.currency;
-                            that.logDatas = resp.content.apiLogDatas;
-                        }
-                        else {
-                            alert('Failed : ' + resp.message)
+                    $.ajax({
+                        url: `@Url.RouteUrl("api_route", new { Controller = "APILog"})?userName=${that.userName}`,
+                        method: 'get',
+                        headers: { "Authorization": `Bearer ${localStorage.getItem('token')}` },
+                        success: function (resp) {
+                            if (resp.success == true) {
+                                that.userName = resp.content.userName;
+                                that.balance = resp.content.balance;
+                                that.currency = resp.content.currency;
+                                that.logDatas = resp.content.apiLogDatas;
+                            }
+                            else {
+                                alert('Failed : ' + resp.message)
+                            }
                         }
                     });
                 }
+            },
+            created: function () {
+                this.getApiToken();
             }
         });
 
